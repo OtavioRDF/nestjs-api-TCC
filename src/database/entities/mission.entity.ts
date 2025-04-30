@@ -5,7 +5,7 @@ import { Player } from "./player.entity";
 @Entity()
 export class Mission {
   @PrimaryGeneratedColumn('increment')
-  id: string;
+  id: number;
 
   @Column()
   name: string; 

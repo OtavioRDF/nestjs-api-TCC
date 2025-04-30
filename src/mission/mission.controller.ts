@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { MissionService } from './mission.service';
 import { CreateMissionDto } from './dto/create-mission.dto';
 import { UpdateMissionDto } from './dto/update-mission.dto';
@@ -19,22 +19,28 @@ export class MissionController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.missionService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.missionService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMissionDto: UpdateMissionDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateMissionDto: UpdateMissionDto) {
     return this.missionService.update(id, updateMissionDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.missionService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.missionService.remove(id);
   }
-
-  @Post('assign-mission')
+  
+  @Post('assign-player')
   assignPlayer(@Body() assignMissionDto: AssignMissionDto) {
     return this.missionService.assignMission(assignMissionDto);
   }
+
+  @Post('complete/:missionId')
+  async completeMission(@Param('missionId', ParseIntPipe) missionId: number) {
+    return await this.missionService.completeMission(missionId);
+  }
+
 }

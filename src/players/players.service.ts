@@ -9,7 +9,6 @@ import { AssignMissionDto } from '../mission/dto/assign-mission.dto';
 
 @Injectable()
 export class PlayersService {
-
   constructor(
     @InjectRepository(Player)
     private playerRepository: Repository<Player>,
@@ -19,7 +18,8 @@ export class PlayersService {
   ) {}
 
   async create(createPlayerDto: CreatePlayerDto) {
-    return await this.playerRepository.save(createPlayerDto);
+    const player = this.playerRepository.create(createPlayerDto);
+    return await this.playerRepository.save(player);
   }
 
   async findAll() {
@@ -27,34 +27,38 @@ export class PlayersService {
   }
 
   async findOne(id: number) {
-    return await this.playerRepository.findOne(
-      { 
-        where: { id } 
-      }
-    );
+    try {
+      return await this.playerRepository.findOneOrFail({ where: { id } });
+    } catch (error) {
+      throw new NotFoundException(`Player with ID ${id} not found!`);
+    }
   }
 
   async update(id: number, updatePlayerDto: UpdatePlayerDto) {
     return await this.playerRepository.manager.transaction(
-      async transactionalEntityManager => {
-        const player = await transactionalEntityManager.findOne(Player, { where: { id } });
+      async (transactionalEntityManager) => {
+        const player = await transactionalEntityManager.findOne(Player, {
+          where: { id },
+        });
 
-        if(!player){
+        if (!player) {
           throw new NotFoundException(`Player with ID ${id} not found!`);
         }
 
         Object.assign(player, updatePlayerDto);
 
         return transactionalEntityManager.save(player);
-      }
-    )
+      },
+    );
   }
 
   async remove(id: number) {
-    const result = await this.playerRepository.delete(id);
+    const player = await this.playerRepository.findOne({ where: { id } });
 
-    if(result.affected === 0){
+    if (!player) {
       throw new NotFoundException(`Player with ID ${id} not found!`);
     }
+
+    await this.playerRepository.remove(player);
   }
 }

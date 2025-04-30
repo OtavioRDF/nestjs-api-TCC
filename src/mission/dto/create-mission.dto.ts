@@ -1,7 +1,7 @@
 import { IsBoolean, IsNumber, IsString } from "class-validator";
 
 export class CreateMissionDto {
-  @IsString()  
+  @IsNumber()  
   name: string;
   
   @IsString()

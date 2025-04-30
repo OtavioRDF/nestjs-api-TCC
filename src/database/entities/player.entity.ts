@@ -21,6 +21,6 @@ export class Player {
     @Column('jsonb', { default: {} })
     skills: Record<string, number>;
 
-    @OneToMany(() => Mission, (mission) => mission.player, { eager: true })
+    @OneToMany(() => Mission, (mission) => mission.player, { eager: true, lazy: true })
     missions: Mission[];
 }

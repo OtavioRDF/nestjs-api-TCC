@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber } from "class-validator";
 
 export class AssignMissionDto {
   @IsNumber()
   @IsNotEmpty()
   playerId: number;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  missionId: string;
+  missionId: number;
 }

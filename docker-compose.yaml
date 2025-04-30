@@ -8,6 +8,11 @@ services:
     container_name: quests-nest
     ports:
       - 3000:3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/metrics"]
+      interval: 15s
+      timeout: 2s
+      retries: 3
     depends_on:
       - database
     networks:
@@ -24,6 +29,10 @@ services:
 
   prometheus:
     image: prom/prometheus
+    command: 
+     - '--web.enable-remote-write-receiver'
+     - '--enable-feature=native-histograms'
+     - '--config.file=/etc/prometheus/prometheus.yml'
     container_name: prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
@@ -39,6 +48,25 @@ services:
       - "3001:3000"
     volumes:
       - grafana-storage:/var/lib/grafana
+    networks:
+      - monitoring
+
+  k6:
+    image: grafana/k6
+    container_name: k6
+    command: [
+      "run",
+      "--out", "experimental-prometheus-rw",
+      "/scripts/test-loader.js"
+    ]
+    environment:
+      K6_PROMETHEUS_RW_SERVER_URL: "http://prometheus:9090/api/v1/write"
+      K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM: true
+    volumes:
+      - ./k6:/scripts
+    depends_on:
+      quests-nest:
+        condition: service_healthy
     networks:
       - monitoring
 

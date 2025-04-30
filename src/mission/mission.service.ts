@@ -9,17 +9,17 @@ import { AssignMissionDto } from './dto/assign-mission.dto';
 
 @Injectable()
 export class MissionService {
-
   constructor(
     @InjectRepository(Mission)
     private readonly missionRepository: Repository<Mission>,
 
     @InjectRepository(Player)
     private readonly playerRepository: Repository<Player>,
-  ){}
+  ) {}
 
   async create(createMissionDto: CreateMissionDto) {
-    return await this.missionRepository.save(createMissionDto);
+    const mission = this.missionRepository.create(createMissionDto);
+    return await this.missionRepository.save(mission);
   }
 
   async findAll() {
@@ -27,34 +27,42 @@ export class MissionService {
   }
 
   async findOne(id: number) {
-    return await this.missionRepository.find();
+    const mission = await this.missionRepository.findOne({ where: { id } });
+
+    if (!mission) {
+      throw new NotFoundException(`Mission with ID ${id} not found!`);
+    }
+
+    return mission;
   }
 
-  async update(id: string, updateMissionDto: UpdateMissionDto) {
+  async update(id: number, updateMissionDto: UpdateMissionDto) {
     return await this.missionRepository.manager.transaction(
-      async transactionalEntityManager => {
-        const mission = await transactionalEntityManager.findOne(Mission, { where: { id } });
+      async (transactionalEntityManager) => {
+        const mission = await transactionalEntityManager.findOne(Mission, {
+          where: { id },
+        });
 
-        if(!mission){
+        if (!mission) {
           throw new NotFoundException(`mission with ID ${id} not found!`);
         }
 
         Object.assign(mission, updateMissionDto);
 
         return transactionalEntityManager.save(mission);
-      }
-    )
+      },
+    );
   }
 
   async remove(id: number) {
     const result = await this.missionRepository.delete(id);
 
-    if(result.affected === 0){
+    if (result.affected === 0) {
       throw new NotFoundException(`Player with ID ${id} not found!`);
     }
   }
 
-  async completeMission(missionId: string): Promise<void> {
+  async completeMission(missionId: number): Promise<void> {
     const mission = await this.missionRepository.findOne({
       where: { id: missionId },
       relations: ['player'],
@@ -81,25 +89,31 @@ export class MissionService {
   }
 
   async assignMission(assignMissionDto: AssignMissionDto) {
-    const player = await this.playerRepository.findOne(
-      { 
-        where: {id: assignMissionDto.playerId}
+    try {
+      const player = await this.playerRepository.findOne({
+        where: { id: assignMissionDto.playerId },
       });
 
-    if(!player){
-      throw new NotFoundException(`Player with ID ${assignMissionDto.playerId} not found!`);
-    }
+      if (!player) {
+        throw new NotFoundException(
+          `Player with ID ${assignMissionDto.playerId} not found!`,
+        );
+      }
 
-    const mission = await this.missionRepository.findOne(
-      { 
-        where: { id: assignMissionDto.missionId }
+      const mission = await this.missionRepository.findOne({
+        where: { id: assignMissionDto.missionId },
       });
 
-    if(!mission){
-      throw new NotFoundException(`Mission with ID ${assignMissionDto.playerId} not found!`);
-    }
-    mission.player = player;
+      if (!mission) {
+        throw new NotFoundException(
+          `Mission with ID ${assignMissionDto.playerId} not found!`,
+        );
+      }
+      mission.player = player;
 
-    return await this.missionRepository.save(mission);
+      return await this.missionRepository.save(mission);
+    } catch (error) {
+      throw new Error(`Error assigning mission: ${error.message}`);
+    }
   }
 }
