@@ -55,11 +55,11 @@ export class MissionService {
   }
 
   async remove(id: number) {
-    const result = await this.missionRepository.delete(id);
-
-    if (result.affected === 0) {
-      throw new NotFoundException(`Player with ID ${id} not found!`);
+    const mission = await this.missionRepository.findOne({ where: { id } });
+    if (!mission) {
+      throw new NotFoundException(`Mission with ID ${id} not found!`);
     }
+    await this.missionRepository.remove(mission);
   }
 
   async completeMission(missionId: number): Promise<void> {
@@ -110,7 +110,7 @@ export class MissionService {
 
       if (!mission) {
         throw new NotFoundException(
-          `Mission with ID ${assignMissionDto.playerId} not found!`,
+          `Mission with ID ${assignMissionDto.missionId} not found!`,
         );
       }
       mission.player = player;

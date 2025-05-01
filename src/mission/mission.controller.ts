@@ -29,8 +29,9 @@ export class MissionController {
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.missionService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    await  this.missionService.remove(id);
+    return { message: `Mission with ID ${id} deleted successfully!` };
   }
   
   @Post('assign-player')
@@ -38,7 +39,7 @@ export class MissionController {
     return this.missionService.assignMission(assignMissionDto);
   }
 
-  @Post('complete/:missionId')
+  @Patch(':missionId/complete')
   async completeMission(@Param('missionId', ParseIntPipe) missionId: number) {
     return await this.missionService.completeMission(missionId);
   }

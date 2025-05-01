@@ -1,17 +1,18 @@
 import { check, group, sleep } from 'k6';
-import { createPlayer, deletePlayer } from './player-test.js';
+import { createPlayer, deletePlayer, updatePlayer } from './player-test.js';
 import {
   createMission,
   assignMission,
   completeMission,
   deleteMission,
+  updateMission,
 } from './mission-test.js';
 
 export const options = {
   stages: [
     { duration: '20s', target: 20 }, // Ramp-up para 20 VUs
-    { duration: '1m', target: 20 },  // Carga estável
-    { duration: '20s', target: 0 },  // Ramp-down
+    { duration: '1m', target: 20 }, // Carga estável
+    { duration: '20s', target: 0 }, // Ramp-down
   ],
 };
 
@@ -33,7 +34,19 @@ export default function () {
     missionId = missionRes.json().id;
   });
 
-  group('Atribuir e completar missão', () => {
+  group('Alterar jogador e missão', () => {
+    const updatePlayerRes = updatePlayer(playerId);
+    check(updatePlayerRes, {
+      'player updated': (res) => res.status === 200,
+    });
+
+    const updateMissionRes = updateMission(missionId);
+    check(updateMissionRes, {
+      'mission updated': (res) => res.status === 200,
+    });
+  });
+
+  group('Atribuir, completar e alterar missão', () => {
     const assignRes = assignMission(playerId, missionId);
     check(assignRes, {
       'mission assigned': (res) => res.status === 201,
@@ -49,14 +62,14 @@ export default function () {
     // Adiciona pequena espera para garantir que criação/atribuição foi concluída
     sleep(0.5);
 
-    const deletePlayerRes = deletePlayer(playerId);
-    check(deletePlayerRes, {
-      'player deleted': (res) => res.status === 200,
-    });
-
     const deleteMissionRes = deleteMission(missionId);
     check(deleteMissionRes, {
       'mission deleted': (res) => res.status === 200,
+    });
+
+    const deletePlayerRes = deletePlayer(playerId);
+    check(deletePlayerRes, {
+      'player deleted': (res) => res.status === 200,
     });
   });
 

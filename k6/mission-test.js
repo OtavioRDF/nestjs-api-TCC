@@ -28,9 +28,20 @@ export function assignMission(playerId, missionId) {
 }
 
 export function completeMission(missionId) {
-  return http.post(`${BASE_URL}/mission/complete/${missionId}`);
+  return http.patch(`${BASE_URL}/mission/${missionId}/complete`);
 }
 
 export function deleteMission(missionId) {
   return http.del(`${BASE_URL}/mission/${missionId}`);
+}
+
+export function updateMission(missionId) {
+  const payload = JSON.stringify({
+    description: `This mission was updated during load testing ${Math.floor(Math.random() * 500) + 100}`,
+    moneyReward: Math.floor(Math.random() * 500) + 100,
+  });
+
+  return http.patch(`${BASE_URL}/mission/${missionId}`, payload, {
+    headers: { 'Content-Type': 'application/json' },
+  });
 }

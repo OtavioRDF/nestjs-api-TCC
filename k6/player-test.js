@@ -19,3 +19,14 @@ export function createPlayer() {
 export function deletePlayer(playerId) {
   return http.del(`${BASE_URL}/players/${playerId}`);
 }
+
+export function updatePlayer(playerId) {
+  const payload = JSON.stringify({
+    money: Math.floor(Math.random() * 500) + 100,
+    reputation: Math.floor(Math.random() * 100),
+  });
+
+  return http.patch(`${BASE_URL}/players/${playerId}`, payload, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+} 
