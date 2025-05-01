@@ -17,6 +17,5 @@ export function createPlayer() {
 }
 
 export function deletePlayer(playerId) {
-  console.log(http.del(`${BASE_URL}/players/${playerId}`));
   return http.del(`${BASE_URL}/players/${playerId}`);
 }

@@ -28,8 +28,6 @@ export function assignMission(playerId, missionId) {
 }
 
 export function completeMission(missionId) {
-  const payload = JSON.stringify({ missionId });
-
   return http.post(`${BASE_URL}/mission/complete/${missionId}`);
 }
 

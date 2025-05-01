@@ -1,7 +1,7 @@
-import { IsJSON, IsNumber, IsString } from "class-validator";
+import { IsNumber, IsString } from "class-validator";
 
 export class CreatePlayerDto {
-    @IsNumber()
+    @IsString()
     name: string;
 
     @IsString()

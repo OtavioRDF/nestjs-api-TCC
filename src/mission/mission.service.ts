@@ -82,10 +82,14 @@ export class MissionService {
 
     // Atualiza o jogador
     const player = mission.player;
-    player.reputation += mission.reputationReward;
-    player.money += mission.moneyReward;
-
-    await this.playerRepository.save(player);
+    
+    if (player) {
+      player.reputation += mission.reputationReward;
+      player.money += mission.moneyReward;
+  
+      await this.playerRepository.save(player);
+    }
+    
   }
 
   async assignMission(assignMissionDto: AssignMissionDto) {
@@ -110,6 +114,12 @@ export class MissionService {
         );
       }
       mission.player = player;
+
+      if (mission.completed) {
+        player.reputation += mission.reputationReward;
+        player.money += mission.moneyReward;
+        await this.playerRepository.save(player);
+      }
 
       return await this.missionRepository.save(mission);
     } catch (error) {
