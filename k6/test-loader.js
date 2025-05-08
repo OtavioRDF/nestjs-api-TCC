@@ -10,9 +10,11 @@ import {
 
 export const options = {
   stages: [
-    { duration: '20s', target: 20 }, // Ramp-up para 20 VUs
-    { duration: '1m', target: 20 }, // Carga estável
-    { duration: '20s', target: 0 }, // Ramp-down
+    { duration: "20s", target: 10 },
+    { duration: "20s", target: 50 }, // Ramp-up para 50 VUs
+    { duration: "20s", target: 100 }, // Ramp-up para 100 VUs
+    { duration: "1m", target: 100 }, // Carga estável
+    { duration: "20s", target: 0 }, // Ramp-down
   ],
 };
 
